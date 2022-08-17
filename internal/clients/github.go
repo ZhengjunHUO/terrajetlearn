@@ -39,6 +39,14 @@ const (
 	errUnmarshalCredentials = "cannot unmarshal github credentials as JSON"
 )
 
+const (
+	keyBaseURL = "base_url"
+	keyOwner   = "owner"
+	keyToken   = "token"
+
+	envToken   = "GITHUB_TOKEN"
+)
+
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
 // returns Terraform provider setup configuration
 func TerraformSetupBuilder(version, providerSource, providerVersion string) terraform.SetupFn {
@@ -78,15 +86,17 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		// Deprecated: In shared gRPC mode we do not support injecting
 		// credentials via the environment variables. You should specify
 		// credentials via the Terraform main.tf.json instead.
-		/*ps.Env = []string{
-			fmt.Sprintf("%s=%s", "HASHICUPS_USERNAME", githubCreds["username"]),
-			fmt.Sprintf("%s=%s", "HASHICUPS_PASSWORD", githubCreds["password"]),
-		}*/
+		ps.Env = []string{
+			fmt.Sprintf("%s=%s", envToken, githubCreds[keyToken]),
+		}
 		// set credentials in Terraform provider configuration
-		/*ps.Configuration = map[string]interface{}{
-			"username": githubCreds["username"],
-			"password": githubCreds["password"],
-		}*/
+		ps.Configuration = map[string]interface{}{}
+		if v, ok := githubCreds[keyBaseURL]; ok {
+			ps.Configuration[keyBaseURL] = v
+		}
+		if v, ok := githubCreds[keyOwner]; ok {
+			ps.Configuration[keyOwner] = v
+		}
 		return ps, nil
 	}
 }
