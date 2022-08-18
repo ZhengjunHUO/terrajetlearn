@@ -17,6 +17,7 @@ limitations under the License.
 package clients
 
 import (
+	"fmt"
 	"context"
 	"encoding/json"
 
